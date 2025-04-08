@@ -110,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
 
     // Conectar al servidor y mantener la conexión abierta
     private class ConnectTask extends AsyncTask<Void, Void, Boolean> {
-
         @Override
         protected Boolean doInBackground(Void... voids) {
             try {
@@ -123,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         }
-
         @Override
         protected void onPostExecute(Boolean result) {
             if (result) {
@@ -141,25 +139,21 @@ public class MainActivity extends AppCompatActivity {
 
     // Enviar el mensaje al servidor en segundo plano
     private class SendMessageTask extends AsyncTask<String, Void, String> {
-
         @Override
         protected String doInBackground(String... messages) {
             try {
                 // Enviar el mensaje
                 String message = messages[0];
                 outputStream.write(message.getBytes());
-
                 // Recibir la respuesta del servidor
                 // String response = inputStream.readLine(); // actualmente el servidor no responde a mensajes
                 String response = "";
                 return response;
-
             } catch (Exception e) {
                 e.printStackTrace();
                 return "Error al enviar el mensaje";
             }
         }
-
         @Override
         protected void onPostExecute(String result) {
             // Mostrar la respuesta del servidor en un Toast
@@ -167,6 +161,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Cerrar la conexión cuando la aplicación pase a segundo plano
+        try {
+            if (socket != null && !socket.isClosed()) {
+                sendMessage("!D");
+                socket.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        // Reabrir la conexion cuando la aplicacion entra a primer plano
+        new ConnectTask().execute();
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -180,5 +193,4 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
 }
