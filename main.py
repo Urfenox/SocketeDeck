@@ -1,6 +1,6 @@
 import os, socket
 import threading
-import acciones
+import acciones, cliente
 os.system("cls")
 
 HEADER = 1024 # para saber cuantos bytes vamos a aceptar
@@ -18,13 +18,17 @@ server.bind(ADDR)
 def handle_cliente(conn: socket.socket, addr):
     print(f"[CONN] {addr} conectado!")
     connected = True
-    while connected:
-        msg = conn.recv(HEADER).decode(FORMAT)
-        if msg == DISCONNECT_MESSAGE or msg == "":
-            connected = False
-            break
-        acciones.accion(int(msg))
-        print(F"[{addr}] {msg}")
+    try:
+        conn.send(cliente.send_config().encode(FORMAT))
+        while connected:
+            msg = conn.recv(HEADER).decode(FORMAT)
+            if msg == DISCONNECT_MESSAGE or msg == "":
+                connected = False
+                break
+            acciones.accion(int(msg))
+            print(F"[{addr}] {msg}")
+    except Exception as ex:
+        pass; #print(F"[ERR] {addr}")
     print(F"[DISC] {addr} desconectado!")
     conn.close()
 

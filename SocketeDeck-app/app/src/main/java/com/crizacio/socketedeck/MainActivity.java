@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridLayout;
+
+import org.json.JSONArray;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,10 +17,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private GridLayout layout;
+    private List<Button> botones = new ArrayList<>(); // Lista para guardar las referencias a los botones
 
     private static final String SERVER_IP = "192.168.8.175";  // Cambia esta IP a la del PC
     private static final int SERVER_PORT = 16100;
@@ -53,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
             Button btn = new Button(this);
             btn.setText("Botón " + i);
             btn.setId(View.generateViewId());
+            // Guardamos el botón en la lista para poder acceder a él más tarde
+            botones.add(btn);
 
             // Asignar un OnClickListener al botón
             final int index = i; // Necesitamos capturar el valor de "i" en una variable final para usarlo en el listener
@@ -62,10 +69,9 @@ public class MainActivity extends AppCompatActivity {
                     // Imprimir el nombre del botón y el valor correspondiente
                     char letra = (char) ('A' + index - 1); // Calcular la letra de acuerdo al botón presionado
                     // Enviar el mensaje
-//                    String data = "btn" + index + ": " + letra;
                     String data = "" + index;
                     sendMessage(data);
-                    System.out.println(data);
+                    System.out.println("btn" + index + ": " + data);
                 }
             });
 
@@ -86,18 +92,6 @@ public class MainActivity extends AppCompatActivity {
             // Asignar los LayoutParams al botón
             btn.setLayoutParams(params);
 
-//            // Asignar una imagen única a cada botón
-//            String imageName = "ic_button" + i; // Nombre de la imagen basado en el índice
-//            int imageResId = getResources().getIdentifier(imageName, "drawable", getPackageName());
-//            if (imageResId != 0) {
-//                btn.setCompoundDrawablesWithIntrinsicBounds(
-//                        getResources().getDrawable(imageResId),  // Imagen SVG única
-//                        null,  // No hay imagen a la izquierda
-//                        null,  // No hay imagen a la derecha
-//                        null   // No hay imagen abajo
-//                );
-//            }
-
             // Agregar el botón al contenedor (LinearLayout)
             layout.addView(btn);
         }
@@ -116,6 +110,14 @@ public class MainActivity extends AppCompatActivity {
                 socket = new Socket(SERVER_IP, SERVER_PORT);
                 outputStream = socket.getOutputStream();
                 inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+                // Leer el mensaje JSON del servidor
+                String jsonResponse = receiveMessage();
+                if (jsonResponse != null) {
+                    // Procesar el mensaje JSON
+                    processJsonResponse(jsonResponse);
+                }
+
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -131,13 +133,65 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    /*
+    * Recibe mensajes de forma asincronica desde el servidor.
+    * */
+    private String receiveMessage() {
+        try {
+            StringBuilder message = new StringBuilder();
+            int bytesRead;
+            char[] buffer = new char[1024];
 
-    // Método para enviar el mensaje al servidor
+            // Verificar si hay datos disponibles para leer
+            while (inputStream.ready()) {
+                bytesRead = inputStream.read(buffer);
+                message.append(buffer, 0, bytesRead);
+            }
+
+            String retorno = message.toString();
+            if (retorno.length() > 0) {
+                System.out.println("JSON: " + retorno);
+                return retorno;
+            }
+
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void processJsonResponse(String jsonResponse) {
+        try {
+            // Convertir la cadena JSON en un JSONArray
+            JSONArray jsonArray = new JSONArray(jsonResponse);
+
+            // Asignar el texto de los botones según la posición de cada item en el array
+            for (int i = 0; i < jsonArray.length(); i++) {
+                if (i < botones.size()) {
+                    String texto = jsonArray.getString(i);
+                    if (texto.isEmpty()) { // si no hay nada. mantenemos el texto actual
+                        continue;
+                    }
+                    // Actualizar el texto de los botones
+                    System.out.println("btn" + i + ": " + texto);
+                    botones.get(i).setText(texto);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+    * Para enviar mensajes al servidor.
+    * */
     private void sendMessage(String message) {
         new SendMessageTask().execute(message);
     }
-
-    // Enviar el mensaje al servidor en segundo plano
+    /*
+    * Este metodo envia el mensaje de forma asincronica al servidor.
+    * */
     private class SendMessageTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... messages) {
