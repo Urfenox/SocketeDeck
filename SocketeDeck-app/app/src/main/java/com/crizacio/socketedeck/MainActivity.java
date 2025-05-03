@@ -1,5 +1,8 @@
 package com.crizacio.socketedeck;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -9,6 +12,9 @@ import android.widget.Button;
 import android.widget.GridLayout;
 
 import org.json.JSONArray;
+
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,12 +27,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    SharedPreferences sharedPref;
+    SharedPreferences.Editor editor;
+    public static String PREF_NAME = "com.crizacio.socketedeck.configuracion";
+    public static String PREF_NAME_SERVER_IP = PREF_NAME + ".server_ip";
+    public static String PREF_NAME_SERVER_PORT = PREF_NAME + ".server_port";
 
     private GridLayout layout;
     private List<Button> botones = new ArrayList<>(); // Lista para guardar las referencias a los botones
 
-    private static final String SERVER_IP = "192.168.8.175";  // Cambia esta IP a la del PC
-    private static final int SERVER_PORT = 16100;
+    private String SERVER_IP;
+    private int SERVER_PORT;
     private Socket socket;
     private OutputStream outputStream;
     private BufferedReader inputStream;
@@ -35,11 +46,48 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        sharedPref = this.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+        SERVER_IP = sharedPref.getString(PREF_NAME_SERVER_IP, "192.168.8.175");
+        SERVER_PORT = sharedPref.getInt(PREF_NAME_SERVER_PORT, 16100);
+
         // Ejecutar la tarea asincrónica para conectarse al servidor
         new ConnectTask().execute();
 
+        // Crear el contenedor principal (LinearLayout) que contendrá el HorizontalScrollView y el GridLayout
+        LinearLayout mainLayout = new LinearLayout(this);
+        mainLayout.setOrientation(LinearLayout.VERTICAL); // Vertical para que el HorizontalScrollView esté arriba
+        mainLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // Crear el HorizontalScrollView para los botones de menú
+        HorizontalScrollView horizontalScrollView = new HorizontalScrollView(this);
+        LinearLayout menuLayout = new LinearLayout(this);
+        menuLayout.setOrientation(LinearLayout.HORIZONTAL); // Los botones estarán en una fila horizontal
+        menuLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        // Crear los botones del menu superior
+        Button btnConfiguracion = new Button(this);
+        btnConfiguracion.setText("Configuración");
+        btnConfiguracion.setId(View.generateViewId());
+        btnConfiguracion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        // Agregar los botones al LinearLayout dentro del HorizontalScrollView
+        menuLayout.addView(btnConfiguracion);
+
+        // Agregar el LinearLayout al HorizontalScrollView
+        horizontalScrollView.addView(menuLayout);
+
+        // Agregar el HorizontalScrollView al layout principal
+        mainLayout.addView(horizontalScrollView);
+
         // Crear el contenedor (GridLayout) con 3 columnas
-        layout = new GridLayout(this);
+        GridLayout layout = new GridLayout(this);
         layout.setRowCount(4);
         layout.setColumnCount(3);
         layout.setId(View.generateViewId()); // Genera un ID único para el contenedor
@@ -48,10 +96,7 @@ public class MainActivity extends AppCompatActivity {
         layout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         // Definir el número de botones a crear
-//        int numBotones = 6;
-//        int numBotones = 9;
         int numBotones = 12;
-//        int numBotones = 24;
 
         // Crear los botones dinámicamente
         for (int i = 1; i <= numBotones; i++) {
@@ -96,8 +141,11 @@ public class MainActivity extends AppCompatActivity {
             layout.addView(btn);
         }
 
+        // Agregar el GridLayout al layout principal
+        mainLayout.addView(layout);
+
         // Establecer el layout de la actividad
-        setContentView(layout);
+        setContentView(mainLayout);
     }
 
 
