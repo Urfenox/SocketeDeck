@@ -1,4 +1,4 @@
-import os, socket
+import os, time, socket
 import threading
 import acciones, cliente
 os.system("cls")
@@ -20,6 +20,7 @@ def handle_cliente(conn: socket.socket, addr):
     connected = True
     try:
         conn.send(cliente.send_config().encode(FORMAT))
+        time.sleep(.5)
         while connected:
             msg = conn.recv(HEADER).decode(FORMAT)
             if msg == DISCONNECT_MESSAGE or msg == "":

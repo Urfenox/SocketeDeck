@@ -15,4 +15,5 @@ def send_config():
         'Detener',
         'Toggle',
     ]
+    print("[BTNS] Enviando configuracion de botones...")
     return json.dumps(configuracion)

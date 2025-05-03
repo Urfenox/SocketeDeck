@@ -111,6 +111,8 @@ public class MainActivity extends AppCompatActivity {
                 outputStream = socket.getOutputStream();
                 inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+                Thread.sleep(500);
+
                 // Leer el mensaje JSON del servidor
                 String jsonResponse = receiveMessage();
                 if (jsonResponse != null) {
@@ -127,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean result) {
             if (result) {
-                Toast.makeText(MainActivity.this, "Conexión establecida", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Conexión establecida", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(MainActivity.this, "Error al conectar al servidor", Toast.LENGTH_SHORT).show();
             }
