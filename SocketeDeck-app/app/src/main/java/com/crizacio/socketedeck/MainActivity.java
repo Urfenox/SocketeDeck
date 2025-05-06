@@ -30,12 +30,14 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
     public static String PREF_NAME = "com.crizacio.socketedeck.configuracion";
+    public static String PREF_NAME_BUTTON_COUNT = PREF_NAME + ".button_count";
     public static String PREF_NAME_SERVER_IP = PREF_NAME + ".server_ip";
     public static String PREF_NAME_SERVER_PORT = PREF_NAME + ".server_port";
 
     private GridLayout layout;
     private List<Button> botones = new ArrayList<>(); // Lista para guardar las referencias a los botones
 
+    private int BUTTON_COUNT;
     private String SERVER_IP;
     private int SERVER_PORT;
     private Socket socket;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPref = this.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = sharedPref.edit();
+        BUTTON_COUNT = sharedPref.getInt(PREF_NAME_BUTTON_COUNT, 12);
         SERVER_IP = sharedPref.getString(PREF_NAME_SERVER_IP, "192.168.8.175");
         SERVER_PORT = sharedPref.getInt(PREF_NAME_SERVER_PORT, 16100);
 
@@ -77,8 +80,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button btnUnBoton = new Button(this);
+        btnUnBoton.setText("Un boton");
+        btnUnBoton.setId(View.generateViewId());
+
+        Button btnQueSeMueve = new Button(this);
+        btnQueSeMueve.setText("Que se mueve");
+        btnQueSeMueve.setId(View.generateViewId());
+
+        Button btnPorAqui = new Button(this);
+        btnPorAqui.setText("por aqui");
+        btnPorAqui.setId(View.generateViewId());
+
         // Agregar los botones al LinearLayout dentro del HorizontalScrollView
         menuLayout.addView(btnConfiguracion);
+        menuLayout.addView(btnUnBoton);
+        menuLayout.addView(btnQueSeMueve);
+        menuLayout.addView(btnPorAqui);
 
         // Agregar el LinearLayout al HorizontalScrollView
         horizontalScrollView.addView(menuLayout);
@@ -96,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         layout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         // Definir el número de botones a crear
-        int numBotones = 12;
+        int numBotones = BUTTON_COUNT;
 
         // Crear los botones dinámicamente
         for (int i = 1; i <= numBotones; i++) {

@@ -18,39 +18,50 @@ import os, sys, time, json
 #         print(ex)
 
 
-# def accion(id: int):
-#     try:
-#         fina_seleccion = [
-#             "gg ez", # 0 -> 1
-#             "ez bots", # 1 -> 2
-#             "K Y S", # 2 -> 3
-#             "stay mad", # 3 -> 4
-#             "SO BAD",
-#             "LMAO BYE",
-#             "facil tutorial",
-#             "zZzZzZzZz",
-#         ]
-#         pyautogui.press('enter')
-#         pyautogui.typewrite(fina_seleccion[id-1], interval=0.01)
-#         pyautogui.press('enter')
-#     except Exception as ex:
-#         print(ex)
-
-
 def accion(id: int):
     try:
-        shortcuts = [
-            lambda: os.system("obs-cli record start"),
-            lambda: os.system("obs-cli record stop"),
-            lambda: os.system("obs-cli record toggle"),
+        fina_seleccion = [
+            "gg ez", # 0 -> 1
+            "ez bots", # 1 -> 2
+            "K Y S", # 2 -> 3
 
-            lambda: os.system("obs-cli stream start"),
-            lambda: os.system("obs-cli stream stop"),
-            lambda: os.system("obs-cli stream toggle"),
+            "stay mad", # 3 -> 4
+            "not even close",
+            "keep trying",
+
+            "facil tutorial",
+            "zZzZzZzZz",
+            "stfu",
+
+            "pal lobby perrin",
+            "anda a llorar al lobby",
+            "got tilted? :)",
+
+            "XDDDDDD",
+            "dayum",
+            "gg wp",
         ]
-        shortcuts[id-1]()
+        pyautogui.press('enter')
+        pyautogui.typewrite(fina_seleccion[id-1], interval=0.01)
+        pyautogui.press('enter')
     except Exception as ex:
         print(ex)
+
+
+# def accion(id: int):
+#     try:
+#         shortcuts = [
+#             lambda: os.system("obs-cli record start"),
+#             lambda: os.system("obs-cli record stop"),
+#             lambda: os.system("obs-cli record toggle"),
+
+#             lambda: os.system("obs-cli stream start"),
+#             lambda: os.system("obs-cli stream stop"),
+#             lambda: os.system("obs-cli stream toggle"),
+#         ]
+#         shortcuts[id-1]()
+#     except Exception as ex:
+#         print(ex)
 
 # def accion(id: int):
 #     try:
