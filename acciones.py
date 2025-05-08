@@ -4,67 +4,56 @@ import os, sys, time, json
 
 
 # def accion(id: int):
-#     try:
-#         shortcuts = [
-#             lambda: pyautogui.hotkey('ctrl', 'z'),
-#             lambda: pyautogui.hotkey('ctrl', 'y'),
-#             lambda: pyautogui.hotkey('ctrl', 'c'),
-#             lambda: pyautogui.hotkey('ctrl', 'v'),
-#             lambda: pyautogui.hotkey('ctrl', 'esc'),
-#             lambda: pyautogui.hotkey('alt', 'f4'),
-#         ]
-#         shortcuts[id-1]()
-#     except Exception as ex:
-#         print(ex)
+#     shortcuts = [
+#         lambda: pyautogui.hotkey('ctrl', 'z'),
+#         lambda: pyautogui.hotkey('ctrl', 'y'),
+#         lambda: pyautogui.hotkey('ctrl', 'c'),
+#         lambda: pyautogui.hotkey('ctrl', 'v'),
+#         lambda: pyautogui.hotkey('ctrl', 'esc'),
+#         lambda: pyautogui.hotkey('alt', 'f4'),
+#     ]
+#     shortcuts[id]()
 
 
 def accion(id: int):
-    try:
-        fina_seleccion = [
-            "gg ez", # 0 -> 1
-            "ez bots", # 1 -> 2
-            "K Y S", # 2 -> 3
+    fina_seleccion = [
+        "GG .i. EZ",
+        "ez bots",
+        "K .i. Y .i. S",
 
-            "stay mad", # 3 -> 4
-            "not even close",
-            "keep trying",
+        "stay mad",
+        "not even close",
+        "keep trying",
 
-            "facil tutorial",
-            "zZzZzZzZz",
-            "stfu",
+        "facil tutorial",
+        "zZzZzZzZz",
+        "stfu",
 
-            "pal lobby perrin",
-            "anda a llorar al lobby",
-            "got tilted? :)",
+        "get good",
+        "u crying?",
+        "got tilted? :)",
 
-            "XDDDDDD",
-            "dayum",
-            "gg wp",
-        ]
-        pyautogui.press('enter')
-        pyautogui.typewrite(fina_seleccion[id-1], interval=0.01)
-        pyautogui.press('enter')
-    except Exception as ex:
-        print(ex)
+        "XDDDDDD",
+        "dayum",
+        "gg wp",
+    ]
+    pyautogui.press('enter')
+    pyautogui.typewrite(fina_seleccion[id], interval=0.01)
+    pyautogui.press('enter')
 
 
 # def accion(id: int):
-#     try:
-#         shortcuts = [
-#             lambda: os.system("obs-cli record start"),
-#             lambda: os.system("obs-cli record stop"),
-#             lambda: os.system("obs-cli record toggle"),
+#     shortcuts = [
+#         lambda: os.system("obs-cli record start"),
+#         lambda: os.system("obs-cli record stop"),
+#         lambda: os.system("obs-cli hotkey trigger \"OBSBasic.PauseRecording\""),
+#         lambda: os.system("obs-cli hotkey trigger \"OBSBasic.UnpauseRecording\""),
+#         lambda: os.system("obs-cli stream start"),
+#         lambda: os.system("obs-cli stream stop"),
+#         lambda: os.system("obs-cli stream toggle"),
+#     ]
+#     shortcuts[id]()
 
-#             lambda: os.system("obs-cli stream start"),
-#             lambda: os.system("obs-cli stream stop"),
-#             lambda: os.system("obs-cli stream toggle"),
-#         ]
-#         shortcuts[id-1]()
-#     except Exception as ex:
-#         print(ex)
 
 # def accion(id: int):
-#     try:
-#         pass
-#     except Exception as ex:
-#         print(ex)
+#     pass

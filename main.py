@@ -1,6 +1,6 @@
-import os, time, socket
+import os, time, json, socket
 import threading
-import acciones, cliente
+import acciones
 os.system("cls")
 
 HEADER = 1024 # para saber cuantos bytes vamos a aceptar
@@ -15,21 +15,30 @@ print("Escuchando en {}:{}...".format(SERVER, PORT))
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
+buttons_texts = []
+with open('config.json') as f:
+    contenido = json.load(f)
+    buttons_texts = contenido['botones']
+
 def handle_cliente(conn: socket.socket, addr):
     print(f"[CONN] {addr} conectado!")
     connected = True
     try:
-        conn.send(cliente.send_config().encode(FORMAT))
+        conn.send(json.dumps(buttons_texts).encode(FORMAT))
         time.sleep(.5)
         while connected:
             msg = conn.recv(HEADER).decode(FORMAT)
             if msg == DISCONNECT_MESSAGE or msg == "":
                 connected = False
                 break
-            acciones.accion(int(msg))
-            print(F"[{addr}] {msg}")
+            msg = int(msg) - 1
+            print(F"[{addr}] {msg} -> {buttons_texts[msg] if msg == len(buttons_texts) else None}")
+            try:
+                acciones.accion(msg)
+            except Exception as ex:
+                print(F"[ERR] {addr} {ex}")
     except Exception as ex:
-        pass; #print(F"[ERR] {addr}")
+        print(F"[ERR] {addr} {ex}")
     print(F"[DISC] {addr} desconectado!")
     conn.close()
 
