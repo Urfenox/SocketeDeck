@@ -15,6 +15,7 @@ print("Escuchando en {}:{}...".format(SERVER, PORT))
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
+contenido = {}
 buttons_texts = []
 with open('config.json') as f:
     contenido = json.load(f)
@@ -32,7 +33,7 @@ def handle_cliente(conn: socket.socket, addr):
                 connected = False
                 break
             msg = int(msg) - 1
-            print(F"[{addr}] {msg} -> {buttons_texts[msg] if msg == len(buttons_texts) else None}")
+            print(F"[{addr}] {msg} -> {buttons_texts[msg] if msg <= len(buttons_texts) else None}")
             try:
                 acciones.accion(msg)
             except Exception as ex:

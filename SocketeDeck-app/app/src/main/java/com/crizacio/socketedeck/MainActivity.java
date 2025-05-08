@@ -51,17 +51,20 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPref = this.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = sharedPref.edit();
-        BUTTON_COUNT = sharedPref.getInt(PREF_NAME_BUTTON_COUNT, 12);
-        BUTTON_ROWS = sharedPref.getInt(PREF_NAME_BUTTON_ROWS, 4);
-        BUTTON_COLUMNS = sharedPref.getInt(PREF_NAME_BUTTON_COLUMNS, 3);
-        SERVER_IP = sharedPref.getString(PREF_NAME_SERVER_IP, "192.168.8.175");
-        SERVER_PORT = sharedPref.getInt(PREF_NAME_SERVER_PORT, 16100);
+        cargarConfiguracion();
 
         // Ejecutar la tarea asincrónica para conectarse al servidor
         conectarServidor();
 
         // Crear el layout principal
         crearLayout();
+    }
+    void cargarConfiguracion() {
+        BUTTON_COUNT = sharedPref.getInt(PREF_NAME_BUTTON_COUNT, 12);
+        BUTTON_ROWS = sharedPref.getInt(PREF_NAME_BUTTON_ROWS, 4);
+        BUTTON_COLUMNS = sharedPref.getInt(PREF_NAME_BUTTON_COLUMNS, 3);
+        SERVER_IP = sharedPref.getString(PREF_NAME_SERVER_IP, "192.168.8.175");
+        SERVER_PORT = sharedPref.getInt(PREF_NAME_SERVER_PORT, 16100);
     }
     void crearLayout() {
         // Crear el contenedor principal (LinearLayout) que contendrá el HorizontalScrollView y el GridLayout
@@ -87,8 +90,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button btnRenderizar = new Button(this);
+        btnRenderizar.setText("Renderizar");
+        btnRenderizar.setId(View.generateViewId());
+        btnRenderizar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cargarConfiguracion();
+                crearLayout();
+            }
+        });
+
+        Button btnConectar = new Button(this);
+        btnConectar.setText("Conectar");
+        btnConectar.setId(View.generateViewId());
+        btnConectar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cargarConfiguracion();
+                conectarServidor();
+            }
+        });
+
         // Agregar los botones al LinearLayout dentro del HorizontalScrollView
         menuLayout.addView(btnConfiguracion);
+        menuLayout.addView(btnRenderizar);
+        menuLayout.addView(btnConectar);
 
         // Agregar el LinearLayout al HorizontalScrollView
         horizontalScrollView.addView(menuLayout);
@@ -159,7 +186,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void conectarServidor() {
-        new ConnectTask().execute();
+        try {
+            if (socket == null || socket.isClosed()) {
+                new ConnectTask().execute();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     void cerrarConexion() {
         try {
