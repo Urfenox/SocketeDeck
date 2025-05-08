@@ -31,15 +31,16 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
     public static String PREF_NAME = "com.crizacio.socketedeck.configuracion";
     public static String PREF_NAME_BUTTON_COUNT = PREF_NAME + ".button_count";
+    public static String PREF_NAME_BUTTON_ROWS = PREF_NAME + ".button_row";
+    public static String PREF_NAME_BUTTON_COLUMNS = PREF_NAME + ".button_column";
     public static String PREF_NAME_SERVER_IP = PREF_NAME + ".server_ip";
     public static String PREF_NAME_SERVER_PORT = PREF_NAME + ".server_port";
 
     private GridLayout layout;
     private List<Button> botones = new ArrayList<>(); // Lista para guardar las referencias a los botones
 
-    private int BUTTON_COUNT;
     private String SERVER_IP;
-    private int SERVER_PORT;
+    private int SERVER_PORT, BUTTON_COUNT, BUTTON_ROWS, BUTTON_COLUMNS;
     private Socket socket;
     private OutputStream outputStream;
     private BufferedReader inputStream;
@@ -51,12 +52,18 @@ public class MainActivity extends AppCompatActivity {
         sharedPref = this.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = sharedPref.edit();
         BUTTON_COUNT = sharedPref.getInt(PREF_NAME_BUTTON_COUNT, 12);
+        BUTTON_ROWS = sharedPref.getInt(PREF_NAME_BUTTON_ROWS, 4);
+        BUTTON_COLUMNS = sharedPref.getInt(PREF_NAME_BUTTON_COLUMNS, 3);
         SERVER_IP = sharedPref.getString(PREF_NAME_SERVER_IP, "192.168.8.175");
         SERVER_PORT = sharedPref.getInt(PREF_NAME_SERVER_PORT, 16100);
 
         // Ejecutar la tarea asincrónica para conectarse al servidor
-        new ConnectTask().execute();
+        conectarServidor();
 
+        // Crear el layout principal
+        crearLayout();
+    }
+    void crearLayout() {
         // Crear el contenedor principal (LinearLayout) que contendrá el HorizontalScrollView y el GridLayout
         LinearLayout mainLayout = new LinearLayout(this);
         mainLayout.setOrientation(LinearLayout.VERTICAL); // Vertical para que el HorizontalScrollView esté arriba
@@ -80,23 +87,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button btnUnBoton = new Button(this);
-        btnUnBoton.setText("Un boton");
-        btnUnBoton.setId(View.generateViewId());
-
-        Button btnQueSeMueve = new Button(this);
-        btnQueSeMueve.setText("Que se mueve");
-        btnQueSeMueve.setId(View.generateViewId());
-
-        Button btnPorAqui = new Button(this);
-        btnPorAqui.setText("por aqui");
-        btnPorAqui.setId(View.generateViewId());
-
         // Agregar los botones al LinearLayout dentro del HorizontalScrollView
         menuLayout.addView(btnConfiguracion);
-        menuLayout.addView(btnUnBoton);
-        menuLayout.addView(btnQueSeMueve);
-        menuLayout.addView(btnPorAqui);
 
         // Agregar el LinearLayout al HorizontalScrollView
         horizontalScrollView.addView(menuLayout);
@@ -104,10 +96,10 @@ public class MainActivity extends AppCompatActivity {
         // Agregar el HorizontalScrollView al layout principal
         mainLayout.addView(horizontalScrollView);
 
-        // Crear el contenedor (GridLayout) con 3 columnas
+        // Crear el contenedor (GridLayout) con sus filas y columnas
         GridLayout layout = new GridLayout(this);
-        layout.setRowCount(4);
-        layout.setColumnCount(3);
+        layout.setRowCount(BUTTON_ROWS);
+        layout.setColumnCount(BUTTON_COLUMNS);
         layout.setId(View.generateViewId()); // Genera un ID único para el contenedor
 
         // Configurar el GridLayout para que ocupe toda la pantalla
@@ -166,8 +158,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(mainLayout);
     }
 
-
-
+    void conectarServidor() {
+        new ConnectTask().execute();
+    }
+    void cerrarConexion() {
+        try {
+            if (socket != null && !socket.isClosed()) {
+                sendMessage("!D");
+                socket.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     // Conectar al servidor y mantener la conexión abierta
     private class ConnectTask extends AsyncTask<Void, Void, Boolean> {
         @Override
@@ -229,6 +232,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /*
+     * Procesa la configuracion de botones del servidor
+     * */
     private void processJsonResponse(String jsonResponse) {
         try {
             // Convertir la cadena JSON en un JSONArray
@@ -287,32 +293,18 @@ public class MainActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         // Cerrar la conexión cuando la aplicación pase a segundo plano
-        try {
-            if (socket != null && !socket.isClosed()) {
-                sendMessage("!D");
-                socket.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        cerrarConexion();
     }
     @Override
     public void onResume(){
         super.onResume();
         // Reabrir la conexion cuando la aplicacion entra a primer plano
-        new ConnectTask().execute();
+        conectarServidor();
     }
     @Override
     protected void onDestroy() {
         super.onDestroy();
         // Cerrar la conexión cuando la aplicación se cierre
-        try {
-            if (socket != null && !socket.isClosed()) {
-                sendMessage("!D");
-                socket.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        cerrarConexion();
     }
 }
