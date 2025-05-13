@@ -23,27 +23,57 @@
         android:orientation="horizontal"
         android:layout_marginBottom="20dp" >
 
-        <EditText
-            android:id="@+id/edtButtonColumns"
-            android:hint="Button columns"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="170dp"
+            android:layout_height="wrap_content" >
+            <TextView
+                android:text="Botones por columna"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:id="@+id/edtButtonColumns"
+                android:hint="Button columns"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
-        <EditText
-            android:id="@+id/edtButtonRows"
-            android:hint="Button rows"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="170dp"
+            android:layout_height="wrap_content" >
+            <TextView
+                android:text="Botones por fila"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:id="@+id/edtButtonRows"
+                android:hint="Button rows"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
     </LinearLayout>
 
+
+    <TextView
+        android:text="Cantidad de botones"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <EditText
         android:id="@+id/edtButtonCount"
         android:hint="Button quantity"
+        android:inputType="number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp" />
 
+    <TextView
+        android:text="Direccion IP del servidor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <EditText
         android:id="@+id/edtServerIp"
         android:hint="Server IP"
@@ -51,9 +81,14 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp" />
 
+    <TextView
+        android:text="Puerto del servidor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <EditText
         android:id="@+id/edtServerPort"
         android:hint="Server port"
+        android:inputType="number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp" />

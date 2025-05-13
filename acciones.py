@@ -2,19 +2,6 @@ import keyboard # pip install keyboard
 import pyautogui # pip install pyautogui
 import os, sys, time, json
 
-
-# def accion(id: int):
-#     shortcuts = [
-#         lambda: pyautogui.hotkey('ctrl', 'z'),
-#         lambda: pyautogui.hotkey('ctrl', 'y'),
-#         lambda: pyautogui.hotkey('ctrl', 'c'),
-#         lambda: pyautogui.hotkey('ctrl', 'v'),
-#         lambda: pyautogui.hotkey('ctrl', 'esc'),
-#         lambda: pyautogui.hotkey('alt', 'f4'),
-#     ]
-#     shortcuts[id]()
-
-
 def accion(id: int):
     fina_seleccion = [
         "GG .i. EZ",
@@ -41,7 +28,6 @@ def accion(id: int):
     pyautogui.typewrite(fina_seleccion[id], interval=0.01)
     pyautogui.press('enter')
 
-
 # def accion(id: int):
 #     shortcuts = [
 #         lambda: os.system("obs-cli record start"),
@@ -53,7 +39,3 @@ def accion(id: int):
 #         lambda: os.system("obs-cli stream toggle"),
 #     ]
 #     shortcuts[id]()
-
-
-# def accion(id: int):
-#     pass

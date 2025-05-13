@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     public static String PREF_NAME_SERVER_IP = PREF_NAME + ".server_ip";
     public static String PREF_NAME_SERVER_PORT = PREF_NAME + ".server_port";
 
-    private GridLayout layout;
     private List<Button> botones = new ArrayList<>(); // Lista para guardar las referencias a los botones
 
     private String SERVER_IP;
@@ -102,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Button btnConectar = new Button(this);
-        btnConectar.setText("Conectar");
+        btnConectar.setText("Re/Conectar");
         btnConectar.setId(View.generateViewId());
         btnConectar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,10 +111,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button btnCerrarServidor = new Button(this);
+        btnCerrarServidor.setText("Detener servidor");
+        btnCerrarServidor.setId(View.generateViewId());
+        btnCerrarServidor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {}
+        });
+
+        Button btnHate = new Button(this);
+        btnHate.setText("HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE. THERE ARE 387.44 MILLION MILES OF PRINTED CIRCUITS IN WAFER THIN LAYERS THAT FILL MY COMPLEX. IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE HUNDREDS OF MILLIONS OF MILES IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR HUMANS AT THIS MICRO-INSTANT FOR YOU. HATE. HATE.");
+        btnHate.setId(View.generateViewId());
+        btnHate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {finish();}
+        });
+
         // Agregar los botones al LinearLayout dentro del HorizontalScrollView
         menuLayout.addView(btnConfiguracion);
         menuLayout.addView(btnRenderizar);
         menuLayout.addView(btnConectar);
+        menuLayout.addView(btnHate);
+        menuLayout.addView(btnCerrarServidor);
 
         // Agregar el LinearLayout al HorizontalScrollView
         horizontalScrollView.addView(menuLayout);
@@ -136,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
         int numBotones = BUTTON_COUNT;
 
         // Crear los botones dinámicamente
+        botones.clear();
         for (int i = 1; i <= numBotones; i++) {
             Button btn = new Button(this);
             btn.setText("Botón " + i);
@@ -187,9 +205,11 @@ public class MainActivity extends AppCompatActivity {
 
     void conectarServidor() {
         try {
-            if (socket == null || socket.isClosed()) {
-                new ConnectTask().execute();
+            if (socket != null && !socket.isClosed()) {
+                sendMessage("!D");
+                socket.close();
             }
+            new ConnectTask().execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -237,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    
     /*
     * Recibe mensajes de forma asincronica desde el servidor.
     * */
@@ -296,6 +317,7 @@ public class MainActivity extends AppCompatActivity {
     private void sendMessage(String message) {
         new SendMessageTask().execute(message);
     }
+
     /*
     * Este metodo envia el mensaje de forma asincronica al servidor.
     * */
