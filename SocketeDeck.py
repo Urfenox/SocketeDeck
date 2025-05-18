@@ -1,49 +1,51 @@
-import os, time, json, socket
+import time, json, socket
 import threading
-import acciones
-os.system("cls")
+import configuracion
 
 HEADER = 1024 # para saber cuantos bytes vamos a aceptar
-# SERVER = socket.gethostbyname(socket.gethostname())
 SERVER = "0.0.0.0" # para red local
 PORT = 16100
 ADDR = (SERVER, PORT)
 FORMAT = "utf-8"
-DISCONNECT_MESSAGE = "!D"
-print("Escuchando en {}:{}...".format(SERVER, PORT))
-
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
+print("Escuchando en {}:{}...".format(SERVER, PORT))
 
 contenido = {}
-buttons_texts = []
 with open('config.json') as f:
     contenido = json.load(f)
-    buttons_texts = contenido['botones']
+accion = configuracion.obtener_modulo(contenido["configuracion"]["acciones"])
+config = configuracion.obtener_configuracion(contenido["configuracion"]["acciones"])
 
 def handle_cliente(conn: socket.socket, addr):
+    global accion, config
     print(f"[CONN] {addr} conectado!")
     connected = True
     try:
-        conn.send(json.dumps(buttons_texts).encode(FORMAT))
+        conn.send(json.dumps(config).encode(FORMAT))
         time.sleep(.5)
         while connected:
             msg = conn.recv(HEADER).decode(FORMAT)
-            if msg == DISCONNECT_MESSAGE or msg == "":
+            if msg.startswith("!D") or msg == "":
                 connected = False
                 break
+            if msg.startswith("!A:"):
+                nueva_accion = msg.split(":")[1]
+                accion = configuracion.obtener_modulo(nueva_accion)
+                config = configuracion.obtener_configuracion(nueva_accion)
+                print(F"[CONF] {addr} cambio acciones a {nueva_accion}")
+                continue
             msg = int(msg) - 1
-            print(F"[{addr}] {msg} -> {buttons_texts[msg] if msg <= len(buttons_texts) else None}")
             try:
-                acciones.accion(msg)
+                respuesta = accion.accion(msg)
+                print(F"[{addr}] {msg} -> {respuesta}")
             except Exception as ex:
                 print(F"[ERR] {addr} {ex}")
     except Exception as ex:
         print(F"[ERR] {addr} {ex}")
     print(F"[DISC] {addr} desconectado!")
     conn.close()
-
-def iniciar():
+def abrir_servidor():
     server.listen() # empezamos a escuchar...
     while True:
         conn, addr = server.accept() # aceptamos la conexion y obtenemos valores conn y addr
@@ -51,4 +53,4 @@ def iniciar():
         thread.start()
         print(f"[COUNT] Conexiones {threading.active_count() - 1}")
 
-iniciar()
+abrir_servidor()

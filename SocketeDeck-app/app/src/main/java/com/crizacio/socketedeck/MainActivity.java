@@ -1,5 +1,6 @@
 package com.crizacio.socketedeck;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,16 +9,20 @@ import android.os.Bundle;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridLayout;
 
-import org.json.JSONArray;
-
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.crizacio.socketedeck.Clases.Acciones;
+import com.crizacio.socketedeck.Clases.Configuracion;
+import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -36,7 +41,9 @@ public class MainActivity extends AppCompatActivity {
     public static String PREF_NAME_SERVER_IP = PREF_NAME + ".server_ip";
     public static String PREF_NAME_SERVER_PORT = PREF_NAME + ".server_port";
 
-    private List<Button> botones = new ArrayList<>(); // Lista para guardar las referencias a los botones
+    private Configuracion configuracion;
+    private List<Button> botonesAccion = new ArrayList<>(); // Guarda los botones que ejecutan acciones
+    private List<Button> botonesAcciones = new ArrayList<>(); // Guarda los botones que cambian las acciones
 
     private String SERVER_IP;
     private int SERVER_PORT, BUTTON_COUNT, BUTTON_ROWS, BUTTON_COLUMNS;
@@ -111,12 +118,57 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button btnCerrarServidor = new Button(this);
-        btnCerrarServidor.setText("Detener servidor");
-        btnCerrarServidor.setId(View.generateViewId());
-        btnCerrarServidor.setOnClickListener(new View.OnClickListener() {
+        Dialog dialogAccions = new Dialog(MainActivity.this);
+        Button btnAcciones = new Button(this);
+        btnAcciones.setText("Acciones");
+        btnAcciones.setId(View.generateViewId());
+        btnAcciones.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {}
+            public void onClick(View v) {
+                Spinner spnAcciones;
+                Button btnAplicar;
+
+                dialogAccions.setContentView(R.layout.dialog_acciones);
+                dialogAccions.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                dialogAccions.setCancelable(false);
+                // dialogAccions.getWindow().getAttributes().windowAnimations = R.style.animation;
+
+                spnAcciones = dialogAccions.findViewById(R.id.spnAcciones);
+                btnAplicar = dialogAccions.findViewById(R.id.btnAplicar);
+
+                // Crear una lista de nombres de las acciones
+                List<String> accionNames = new ArrayList<>();
+                for (Acciones accion : configuracion.getAcciones()) {
+                    accionNames.add(accion.getNombre());  // Agregar el nombre de cada acción
+                }
+                // Crear un ArrayAdapter con los nombres de las acciones
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, accionNames);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Estilo del dropdown
+                // Establecer el adapter en el spinner
+                spnAcciones.setAdapter(adapter);
+
+                btnAplicar.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Obtener el item seleccionado
+                        int selectedPosition = spnAcciones.getSelectedItemPosition(); // Obtiene la posicion seleccionada
+                        String selectedAccion = spnAcciones.getSelectedItem().toString(); // Obtiene el nombre de la accion seleccionada
+
+                        // Obtener la lista de acciones de la Accion seleccionada
+                        Acciones accionSeleccionada = configuracion.getAcciones().get(selectedPosition);
+
+                        // Aplicar los textos segun la Accion selecionada
+                        aplicarTextoAcciones(accionSeleccionada);
+
+                        // Enviar mensaje al servidor para cambiar la Accion a la seleccionada
+                        sendMessage("!A:"+accionSeleccionada.getNombre());
+
+                        // Cerrar el dialogo
+                        dialogAccions.dismiss();
+                    }
+                });
+                dialogAccions.show();
+            }
         });
 
         Button btnHate = new Button(this);
@@ -124,15 +176,15 @@ public class MainActivity extends AppCompatActivity {
         btnHate.setId(View.generateViewId());
         btnHate.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {finish();}
+            public void onClick(View v) {}
         });
 
         // Agregar los botones al LinearLayout dentro del HorizontalScrollView
         menuLayout.addView(btnConfiguracion);
-        menuLayout.addView(btnRenderizar);
+        menuLayout.addView(btnAcciones);
         menuLayout.addView(btnConectar);
+        menuLayout.addView(btnRenderizar);
         menuLayout.addView(btnHate);
-        menuLayout.addView(btnCerrarServidor);
 
         // Agregar el LinearLayout al HorizontalScrollView
         horizontalScrollView.addView(menuLayout);
@@ -153,13 +205,13 @@ public class MainActivity extends AppCompatActivity {
         int numBotones = BUTTON_COUNT;
 
         // Crear los botones dinámicamente
-        botones.clear();
+        botonesAccion.clear();
         for (int i = 1; i <= numBotones; i++) {
             Button btn = new Button(this);
             btn.setText("Botón " + i);
             btn.setId(View.generateViewId());
             // Guardamos el botón en la lista para poder acceder a él más tarde
-            botones.add(btn);
+            botonesAccion.add(btn);
 
             // Asignar un OnClickListener al botón
             final int index = i; // Necesitamos capturar el valor de "i" en una variable final para usarlo en el listener
@@ -224,43 +276,58 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    // Conectar al servidor y mantener la conexión abierta
-    private class ConnectTask extends AsyncTask<Void, Void, Boolean> {
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            try {
-                socket = new Socket(SERVER_IP, SERVER_PORT);
-                outputStream = socket.getOutputStream();
-                inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                Thread.sleep(500);
-
-                // Leer el mensaje JSON del servidor
-                String jsonResponse = receiveMessage();
-                if (jsonResponse != null) {
-                    // Procesar el mensaje JSON
-                    processJsonResponse(jsonResponse);
-                }
-
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
+    private void procesarConfiguracion(String jsonResponse) {
+        try {
+            Gson gson = new Gson();
+            configuracion = gson.fromJson(jsonResponse, Configuracion.class);
+            aplicarTextoAcciones(configuracion.getAcciones().get(0)); // sabemos que el primero es el por defecto del servidor
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        @Override
-        protected void onPostExecute(Boolean result) {
-            if (result) {
-//                Toast.makeText(MainActivity.this, "Conexión establecida", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(MainActivity.this, "Error al conectar al servidor", Toast.LENGTH_SHORT).show();
+    }
+    private void aplicarTextoAcciones(Acciones acciones) {
+        // Asignar el texto de los botones segun la posicion de cada item en el array
+        for (int i = 0; i < acciones.getTextos_acciones().size(); i++) {
+            if (i < botonesAccion.size()) {
+                String texto = acciones.getTextos_acciones().get(i);
+                if (texto.isEmpty()) { // si no hay nada. mantenemos el texto actual
+                    continue;
+                }
+                // Actualizar el texto de los botones
+                System.out.println("btn" + i + ": " + texto);
+                botonesAccion.get(i).setText(texto);
             }
         }
     }
-    
-    /*
-    * Recibe mensajes de forma asincronica desde el servidor.
-    * */
+
+
+
+    private void sendMessage(String message) {
+        new SendMessageTask().execute(message);
+    }
+    private class SendMessageTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... messages) {
+            try {
+                // Enviar el mensaje
+                String message = messages[0];
+                outputStream.write(message.getBytes());
+                // Recibir la respuesta del servidor
+                // String response = inputStream.readLine(); // actualmente el servidor no responde a mensajes
+                String response = "";
+                return response;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Error al enviar el mensaje";
+            }
+        }
+        @Override
+        protected void onPostExecute(String result) {
+            // Mostrar la respuesta del servidor en un Toast
+            // Toast.makeText(MainActivity.this, "Respuesta del servidor: " + result, Toast.LENGTH_LONG).show();
+        }
+    }
     private String receiveMessage() {
         try {
             StringBuilder message = new StringBuilder();
@@ -285,62 +352,36 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
-
-    /*
-     * Procesa la configuracion de botones del servidor
-     * */
-    private void processJsonResponse(String jsonResponse) {
-        try {
-            // Convertir la cadena JSON en un JSONArray
-            JSONArray jsonArray = new JSONArray(jsonResponse);
-
-            // Asignar el texto de los botones según la posición de cada item en el array
-            for (int i = 0; i < jsonArray.length(); i++) {
-                if (i < botones.size()) {
-                    String texto = jsonArray.getString(i);
-                    if (texto.isEmpty()) { // si no hay nada. mantenemos el texto actual
-                        continue;
-                    }
-                    // Actualizar el texto de los botones
-                    System.out.println("btn" + i + ": " + texto);
-                    botones.get(i).setText(texto);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /*
-    * Para enviar mensajes al servidor.
-    * */
-    private void sendMessage(String message) {
-        new SendMessageTask().execute(message);
-    }
-
-    /*
-    * Este metodo envia el mensaje de forma asincronica al servidor.
-    * */
-    private class SendMessageTask extends AsyncTask<String, Void, String> {
+    private class ConnectTask extends AsyncTask<Void, Void, Boolean> {
         @Override
-        protected String doInBackground(String... messages) {
+        protected Boolean doInBackground(Void... voids) {
             try {
-                // Enviar el mensaje
-                String message = messages[0];
-                outputStream.write(message.getBytes());
-                // Recibir la respuesta del servidor
-                // String response = inputStream.readLine(); // actualmente el servidor no responde a mensajes
-                String response = "";
-                return response;
+                socket = new Socket(SERVER_IP, SERVER_PORT);
+                outputStream = socket.getOutputStream();
+                inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+                Thread.sleep(500);
+
+                // Leer el mensaje JSON del servidor
+                String jsonResponse = receiveMessage();
+                if (jsonResponse != null) {
+                    // Procesar el mensaje JSON
+                    procesarConfiguracion(jsonResponse);
+                }
+
+                return true;
             } catch (Exception e) {
                 e.printStackTrace();
-                return "Error al enviar el mensaje";
+                return false;
             }
         }
         @Override
-        protected void onPostExecute(String result) {
-            // Mostrar la respuesta del servidor en un Toast
-            // Toast.makeText(MainActivity.this, "Respuesta del servidor: " + result, Toast.LENGTH_LONG).show();
+        protected void onPostExecute(Boolean result) {
+            if (result) {
+//                Toast.makeText(MainActivity.this, "Conexión establecida", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Error al conectar al servidor", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

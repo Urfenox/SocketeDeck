@@ -1,28 +1,8 @@
 {
     "configuracion": {
+        "acciones": "toxic_prompts",
         "botones": 12,
         "columnas": 3,
         "filas": 4
-    },
-    "botones": [
-        "GG .i. EZ",
-        "ez bots",
-        "K .i. Y .i. S",
-
-        "stay mad",
-        "not even close",
-        "keep trying",
-
-        "facil tutorial",
-        "zZzZzZzZz",
-        "stfu",
-
-        "casi me despierto",
-        "u crying?",
-        "got tilted? :)",
-
-        "XDDDDDD",
-        "dayum",
-        "gg wp"
-    ]
+    }
 }
