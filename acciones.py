@@ -16,7 +16,7 @@ def accion(id: int):
         "zZzZzZzZz",
         "stfu",
 
-        "get good",
+        "casi me despierto",
         "u crying?",
         "got tilted? :)",
 

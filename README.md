@@ -2,7 +2,7 @@
 
 Con Python y una aplicación Android puedes tener un StreamDeck gratuito y funcional. Personalizable 100%*.
 
-> * Requiere de conocimientos de programación.
+> _\* Requiere de conocimientos de programación._
 
 ## Why?
 
