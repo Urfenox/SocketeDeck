@@ -1,56 +1,72 @@
-import time, json, socket
-import threading
+import os, time, json
+import socket, threading
 import configuracion
+os.system("cls") if os.name == "nt" else os.system("clear")
 
-HEADER = 1024 # para saber cuantos bytes vamos a aceptar
 SERVER = "0.0.0.0" # para red local
 PORT = 16100
 ADDR = (SERVER, PORT)
-FORMAT = "utf-8"
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(ADDR)
-print("Escuchando en {}:{}...".format(SERVER, PORT))
 
-contenido = {}
-with open('config.json') as f:
-    contenido = json.load(f)
-accion = configuracion.obtener_modulo(contenido["configuracion"]["acciones"])
-config = configuracion.obtener_configuracion(contenido["configuracion"]["acciones"])
+class Cliente:
+    HEADER = 1024
+    FORMAT = "utf-8"
 
-def handle_cliente(conn: socket.socket, addr):
-    global accion, config
-    print(f"[CONN] {addr} conectado!")
-    connected = True
-    try:
-        conn.send(json.dumps(config).encode(FORMAT))
-        time.sleep(.5)
-        while connected:
-            msg = conn.recv(HEADER).decode(FORMAT)
-            if msg.startswith("!D") or msg == "":
-                connected = False
-                break
-            if msg.startswith("!A:"):
-                nueva_accion = msg.split(":")[1]
-                accion = configuracion.obtener_modulo(nueva_accion)
-                config = configuracion.obtener_configuracion(nueva_accion)
-                print(F"[CONF] {addr} cambio acciones a {nueva_accion}")
-                continue
-            msg = int(msg) - 1
-            try:
-                respuesta = accion.accion(msg)
-                print(F"[{addr}] {msg} -> {respuesta}")
-            except Exception as ex:
-                print(F"[ERR] {addr} {ex}")
-    except Exception as ex:
-        print(F"[ERR] {addr} {ex}")
-    print(F"[DISC] {addr} desconectado!")
-    conn.close()
+    def __init__(self, conn: socket.socket, addr):
+        self.conn = conn
+        self.addr = addr
+        self.accion = None
+        self.config = None
+        self.connected = True
+
+        # Cargar configuracion inicial
+        self.cargar_configuracion()
+
+    def cargar_configuracion(self):
+        contenido = {}
+        with open('config.json') as f:
+            contenido = json.load(f)
+        self.accion = configuracion.obtener_modulo(contenido["configuracion"]["acciones"])
+        self.config = configuracion.obtener_configuracion(contenido["configuracion"]["acciones"])
+
+    def atender_cliente(self):
+        print(f"[{self.addr}] conectado!")
+        try:
+            self.conn.send(json.dumps(self.config).encode(self.FORMAT))
+            time.sleep(0.5)
+            while self.connected:
+                msg = self.conn.recv(self.HEADER).decode(self.FORMAT)
+                if msg.startswith("!D") or msg == "":
+                    self.connected = False
+                    break
+                if msg.startswith("!A:"):
+                    nueva_accion = msg.split(":")[1]
+                    self.accion = configuracion.obtener_modulo(nueva_accion)
+                    self.config = configuracion.obtener_configuracion(nueva_accion)
+                    print(f"[{self.addr}] cambio acciones a {nueva_accion}")
+                    continue
+                msg = int(msg) - 1
+                try:
+                    respuesta = self.accion.accion(msg)
+                    print(f"[{self.addr}] {msg} -> {respuesta}")
+                except Exception as ex:
+                    print(f"[ERROR] {self.addr} {ex}")
+        except Exception as ex:
+            print(f"[ERROR] {self.addr} {ex}")
+        finally:
+            print(f"[{self.addr}] desconectado!")
+            self.conn.close()
+
 def abrir_servidor():
-    server.listen() # empezamos a escuchar...
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(ADDR)
+    server.listen()
+    print("Escuchando en {}:{}...".format(SERVER, PORT))
     while True:
-        conn, addr = server.accept() # aceptamos la conexion y obtenemos valores conn y addr
-        thread = threading.Thread(target=handle_cliente, args=(conn, addr)) # creamos un thread para el cliente
+        conn, addr = server.accept()
+        cli = Cliente(conn, addr)
+        thread = threading.Thread(target=cli.atender_cliente)
         thread.start()
         print(f"[COUNT] Conexiones {threading.active_count() - 1}")
 
-abrir_servidor()
+if __name__ == "__main__":
+    abrir_servidor()

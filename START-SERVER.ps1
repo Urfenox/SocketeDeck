@@ -1,2 +1,4 @@
+# Carga el entorno virtual de Python
 .\.venv\Scripts\activate
-py main.py
+# Ejecuta el script principal de SocketeDeck
+py SocketeDeck.py
