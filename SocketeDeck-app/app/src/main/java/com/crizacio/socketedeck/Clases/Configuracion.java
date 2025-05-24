@@ -17,6 +17,10 @@ public class Configuracion {
     public String getAccion() {
         return accion;
     }
+    public void setAccion(String accion) {
+        this.accion = accion;
+    }
+
     public List<Acciones> getAcciones() {
         return acciones;
     }

@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Estilo del dropdown
                 // Establecer el adapter en el spinner
                 spnAcciones.setAdapter(adapter);
+                spnAcciones.setSelection(accionNames.indexOf(configuracion.getAccion()));
 
                 btnAplicar.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -156,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
                         // Obtener la lista de acciones de la Accion seleccionada
                         Acciones accionSeleccionada = configuracion.getAcciones().get(selectedPosition);
+                        configuracion.setAccion(accionSeleccionada.getNombre());
 
                         // Aplicar los textos segun la Accion selecionada
                         aplicarTextoAcciones(accionSeleccionada);
