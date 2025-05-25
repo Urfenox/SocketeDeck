@@ -12,7 +12,11 @@ def obtener_configuracion(accion_actual: str)-> dict:
     # Garantiza que el preset actual este en la primera posicion
     _modulo = importlib.import_module(str('acciones.{}').format(accion_actual))
     _preset = {
-        "nombre": accion_actual,
+        "nombre": _modulo.about['nombre'] or accion_actual,
+        "descripcion": _modulo.about['descripcion'] or '',
+        "autor": _modulo.about['autor'] or '',
+        "version": _modulo.about['version'] or '',
+        "modulo": accion_actual,
         "textos_acciones": _modulo.textos_acciones()
     }
     acciones_disponibles.append(_preset)
@@ -20,7 +24,11 @@ def obtener_configuracion(accion_actual: str)-> dict:
         if not _accion == accion_actual:
             _modulo = importlib.import_module(str('acciones.{}').format(_accion))
             _preset = {
-                "nombre": _accion,
+                "nombre": _modulo.about['nombre'] or _accion,
+                "descripcion": _modulo.about['descripcion'] or '',
+                "autor": _modulo.about['autor'] or '',
+                "version": _modulo.about['version'] or '',
+                "modulo": _accion,
                 "textos_acciones": _modulo.textos_acciones()
             }
             acciones_disponibles.append(_preset)

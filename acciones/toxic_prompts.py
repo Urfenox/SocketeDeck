@@ -1,6 +1,7 @@
-# SocketeDeck solo necesita las funciones:
+# SocketeDeck solo necesita de:
 #   - texto_acciones()
 #   - accion()
+#   - about: dict
 # Si estas existen, todo irá bien. Lo demás lo organizas tú.
 # A continuación, este es uno de los ejemplos.
 #
@@ -39,3 +40,10 @@ def accion(id: int)-> str:
     pyautogui.typewrite(elemento, interval=0.01)
     pyautogui.press('enter')
     return elemento
+
+about = {
+    "nombre": "Overwatch Toxic Prompts",
+    "descripcion": "",
+    "autor": "Urfenox",
+    "version": "1.0"
+}

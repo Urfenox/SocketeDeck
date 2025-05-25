@@ -1,6 +1,7 @@
-# SocketeDeck solo necesita las funciones:
+# SocketeDeck solo necesita de:
 #   - texto_acciones()
 #   - accion()
+#   - about: dict
 # Si estas existen, todo irá bien. Lo demás lo organizas tú.
 # A continuación, este es uno de los ejemplos.
 #
@@ -35,3 +36,10 @@ def accion(id: int)-> str:
     ]
     shortcuts[id]()
     return textos[id]
+
+about = {
+    "nombre": "OBS Studio Controller",
+    "descripcion": "",
+    "autor": "Urfenox",
+    "version": "2.0"
+}

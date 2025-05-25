@@ -23,6 +23,7 @@ Puedes programar tu propio módulo para que haga las cosas que tú quieras. Eso 
 
  - `textos_acciones()-> list`: Debe devolver los textos a renderizar en la aplicación móvil.  
  - `accion(id: int)-> str`: Es la función que procesa la acción según el botón presionado, debe devolver una `string`.  
+ - `about: dict`: Contiene información sobre el preset de acciones.  
 
 En la aplicación móvil puedes seleccionar qué preset activar con el botón Acciones.  
 
@@ -50,3 +51,12 @@ Finalmente, inicia el servidor
 ```sh
 py SocketeDeck.py
 ```
+
+## Roadmap
+
+Aunque el proyecto para mí está terminado, ya que cumple la función por la que fue desarrollado, me gustaría agregarle algunas otras cosas.  
+
+ - Padding de botones: Comandos vacíos para saltar botones en la app móvil.
+ - Iconos: Set de iconos preestablecidos (seguramente de Bootstrap o Font Awesome) que se puedan ver en la app móvil.
+
+> - ~~Información de acciones: Darle un nombre y descripción, junto con el autor y versión de una acción.~~  

@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
                         aplicarTextoAcciones(accionSeleccionada);
 
                         // Enviar mensaje al servidor para cambiar la Accion a la seleccionada
-                        sendMessage("!A:"+accionSeleccionada.getNombre());
+                        sendMessage("!A:"+accionSeleccionada.getModulo());
 
                         // Cerrar el dialogo
                         dialogAccions.dismiss();

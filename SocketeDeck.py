@@ -42,7 +42,7 @@ class Cliente:
                     nueva_accion = msg.split(":")[1]
                     self.accion = configuracion.obtener_modulo(nueva_accion)
                     self.config = configuracion.obtener_configuracion(nueva_accion)
-                    print(f"[{self.addr}] cambio acciones a {nueva_accion}")
+                    print(f"[{self.addr}] cambio modulo a {nueva_accion}")
                     continue
                 msg = int(msg) - 1
                 try:
