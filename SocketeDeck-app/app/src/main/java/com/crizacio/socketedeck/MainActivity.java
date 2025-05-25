@@ -1,5 +1,7 @@
 package com.crizacio.socketedeck;
 
+import static android.view.View.INVISIBLE;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -293,13 +295,20 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < acciones.getTextos_acciones().size(); i++) {
             if (i < botonesAccion.size()) {
                 String texto = acciones.getTextos_acciones().get(i);
-                if (texto.isEmpty()) { // si no hay nada. mantenemos el texto actual
+                if (texto.isEmpty()) { // si no hay nada. deshabilitamos
+                    botonesAccion.get(i).setEnabled(false);
+                    botonesAccion.get(i).setVisibility(INVISIBLE);
                     continue;
                 }
                 // Actualizar el texto de los botones
                 System.out.println("btn" + i + ": " + texto);
                 botonesAccion.get(i).setText(texto);
             }
+        }
+        // Ocultar los botones restantes
+        for (int i = acciones.getTextos_acciones().size(); i < botonesAccion.size(); i++) {
+            botonesAccion.get(i).setVisibility(View.INVISIBLE);
+            botonesAccion.get(i).setEnabled(false);
         }
     }
 

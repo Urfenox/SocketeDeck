@@ -56,7 +56,7 @@ py SocketeDeck.py
 
 Aunque el proyecto para mí está terminado, ya que cumple la función por la que fue desarrollado, me gustaría agregarle algunas otras cosas.  
 
- - Padding de botones: Comandos vacíos para saltar botones en la app móvil.
  - Iconos: Set de iconos preestablecidos (seguramente de Bootstrap o Font Awesome) que se puedan ver en la app móvil.
 
+> - ~~Padding de botones: Comandos vacíos para saltar botones en la app móvil.~~  
 > - ~~Información de acciones: Darle un nombre y descripción, junto con el autor y versión de una acción.~~  

@@ -14,6 +14,7 @@ textos = [
     "Detener grabacion",
     "Pausar grabacion",
     "Reanudar grabacion",
+    "", "",
 
     "Iniciar transmision",
     "Detener transmision",
@@ -30,6 +31,7 @@ def accion(id: int)-> str:
         lambda: os.system("obs-cli record stop"),
         lambda: os.system("obs-cli hotkey trigger \"OBSBasic.PauseRecording\""),
         lambda: os.system("obs-cli hotkey trigger \"OBSBasic.UnpauseRecording\""),
+        lambda: None, lambda: None,
         lambda: os.system("obs-cli stream start"),
         lambda: os.system("obs-cli stream stop"),
         lambda: os.system("obs-cli stream toggle"),
