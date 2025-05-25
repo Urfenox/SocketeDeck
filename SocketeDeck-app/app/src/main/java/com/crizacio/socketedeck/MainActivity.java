@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -21,6 +22,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.crizacio.socketedeck.Clases.Acciones;
 import com.crizacio.socketedeck.Clases.Configuracion;
@@ -212,6 +214,8 @@ public class MainActivity extends AppCompatActivity {
         botonesAccion.clear();
         for (int i = 1; i <= numBotones; i++) {
             Button btn = new Button(this);
+            Typeface fontAwesome = ResourcesCompat.getFont(MainActivity.this, R.font.fa_solid_900);
+            btn.setTypeface(fontAwesome);
             btn.setText("Botón " + i);
             btn.setId(View.generateViewId());
             // Guardamos el botón en la lista para poder acceder a él más tarde
