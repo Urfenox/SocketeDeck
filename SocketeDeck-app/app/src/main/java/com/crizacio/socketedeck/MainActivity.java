@@ -1,6 +1,7 @@
 package com.crizacio.socketedeck;
 
 import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     public static String PREF_NAME_BUTTON_COUNT = PREF_NAME + ".button_count";
     public static String PREF_NAME_BUTTON_ROWS = PREF_NAME + ".button_row";
     public static String PREF_NAME_BUTTON_COLUMNS = PREF_NAME + ".button_column";
+    public static String PREF_NAME_BUTTON_TEXT_SIZE = PREF_NAME + ".button_text_size";
     public static String PREF_NAME_SERVER_IP = PREF_NAME + ".server_ip";
     public static String PREF_NAME_SERVER_PORT = PREF_NAME + ".server_port";
 
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String SERVER_IP;
     private int SERVER_PORT, BUTTON_COUNT, BUTTON_ROWS, BUTTON_COLUMNS;
+    private float BUTTON_TEXT_SIZE;
     private Socket socket;
     private OutputStream outputStream;
     private BufferedReader inputStream;
@@ -73,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         BUTTON_COUNT = sharedPref.getInt(PREF_NAME_BUTTON_COUNT, 12);
         BUTTON_ROWS = sharedPref.getInt(PREF_NAME_BUTTON_ROWS, 4);
         BUTTON_COLUMNS = sharedPref.getInt(PREF_NAME_BUTTON_COLUMNS, 3);
+        BUTTON_TEXT_SIZE = sharedPref.getFloat(PREF_NAME_BUTTON_TEXT_SIZE, 15);
         SERVER_IP = sharedPref.getString(PREF_NAME_SERVER_IP, "192.168.8.175");
         SERVER_PORT = sharedPref.getInt(PREF_NAME_SERVER_PORT, 16100);
     }
@@ -214,9 +219,11 @@ public class MainActivity extends AppCompatActivity {
         botonesAccion.clear();
         for (int i = 1; i <= numBotones; i++) {
             Button btn = new Button(this);
-            Typeface fontAwesome = ResourcesCompat.getFont(MainActivity.this, R.font.fa_solid_900);
-            btn.setTypeface(fontAwesome);
+//            Typeface fontAwesome = ResourcesCompat.getFont(MainActivity.this, R.font.fa_solid_900);
+//            btn.setAllCaps(false); btn.setTransformationMethod(null);
+//            btn.setTypeface(fontAwesome);
             btn.setText("Botón " + i);
+            btn.setTextSize(TypedValue.COMPLEX_UNIT_DIP, BUTTON_TEXT_SIZE);
             btn.setId(View.generateViewId());
             // Guardamos el botón en la lista para poder acceder a él más tarde
             botonesAccion.add(btn);
@@ -300,13 +307,14 @@ public class MainActivity extends AppCompatActivity {
             if (i < botonesAccion.size()) {
                 String texto = acciones.getTextos_acciones().get(i);
                 if (texto.isEmpty()) { // si no hay nada. deshabilitamos
-                    botonesAccion.get(i).setEnabled(false);
-                    botonesAccion.get(i).setVisibility(INVISIBLE);
+                    botonesAccion.get(i).setEnabled(false); botonesAccion.get(i).setVisibility(INVISIBLE);
                     continue;
                 }
                 // Actualizar el texto de los botones
                 System.out.println("btn" + i + ": " + texto);
                 botonesAccion.get(i).setText(texto);
+                botonesAccion.get(i).setEnabled(true); botonesAccion.get(i).setVisibility(VISIBLE);
+                botonesAccion.get(i).setAllCaps(false); botonesAccion.get(i).setTransformationMethod(null);
             }
         }
         // Ocultar los botones restantes

@@ -71,6 +71,18 @@
         android:layout_marginBottom="20dp" />
 
     <TextView
+        android:text="Tamaño de la letra"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <EditText
+        android:id="@+id/edtButtonTextSize"
+        android:hint="Button text size"
+        android:inputType="number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
         android:text="Direccion IP del servidor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
