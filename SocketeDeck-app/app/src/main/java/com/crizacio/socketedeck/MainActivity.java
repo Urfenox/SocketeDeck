@@ -7,26 +7,25 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridLayout;
 
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
 
 import com.crizacio.socketedeck.Clases.Acciones;
+import com.crizacio.socketedeck.Clases.AccionesListAdapter;
 import com.crizacio.socketedeck.Clases.Configuracion;
 import com.google.gson.Gson;
 
@@ -50,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Configuracion configuracion;
     private List<Button> botonesAccion = new ArrayList<>(); // Guarda los botones que ejecutan acciones
-    private List<Button> botonesAcciones = new ArrayList<>(); // Guarda los botones que cambian las acciones
 
     private String SERVER_IP;
     private int SERVER_PORT, BUTTON_COUNT, BUTTON_ROWS, BUTTON_COLUMNS;
@@ -105,28 +103,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button btnRenderizar = new Button(this);
-        btnRenderizar.setText("Renderizar");
-        btnRenderizar.setId(View.generateViewId());
-        btnRenderizar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cargarConfiguracion();
-                crearLayout();
-            }
-        });
-
-        Button btnConectar = new Button(this);
-        btnConectar.setText("Re/Conectar");
-        btnConectar.setId(View.generateViewId());
-        btnConectar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cargarConfiguracion();
-                conectarServidor();
-            }
-        });
-
         Dialog dialogAccions = new Dialog(MainActivity.this);
         Button btnAcciones = new Button(this);
         btnAcciones.setText("Acciones");
@@ -134,38 +110,24 @@ public class MainActivity extends AppCompatActivity {
         btnAcciones.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Spinner spnAcciones;
-                Button btnAplicar;
+                ListView lstAcciones;
 
                 dialogAccions.setContentView(R.layout.dialog_acciones);
                 dialogAccions.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                dialogAccions.setCancelable(false);
-                // dialogAccions.getWindow().getAttributes().windowAnimations = R.style.animation;
+                dialogAccions.setCancelable(true);
+                dialogAccions.setCanceledOnTouchOutside(true);
 
-                spnAcciones = dialogAccions.findViewById(R.id.spnAcciones);
-                btnAplicar = dialogAccions.findViewById(R.id.btnAplicar);
+                lstAcciones = dialogAccions.findViewById(R.id.lstAcciones);
 
-                // Crear una lista de nombres de las acciones
-                List<String> accionNames = new ArrayList<>();
-                for (Acciones accion : configuracion.getAcciones()) {
-                    accionNames.add(accion.getNombre());  // Agregar el nombre de cada acción
-                }
-                // Crear un ArrayAdapter con los nombres de las acciones
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, accionNames);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Estilo del dropdown
-                // Establecer el adapter en el spinner
-                spnAcciones.setAdapter(adapter);
-                spnAcciones.setSelection(accionNames.indexOf(configuracion.getAccion()));
+                // Crea el adaptador y lo aplica
+                AccionesListAdapter listaAccionesAdapter = new AccionesListAdapter(MainActivity.this, configuracion.getAcciones());
+                lstAcciones.setAdapter(listaAccionesAdapter);
 
-                btnAplicar.setOnClickListener(new View.OnClickListener() {
+                lstAcciones.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        // Obtener el item seleccionado
-                        int selectedPosition = spnAcciones.getSelectedItemPosition(); // Obtiene la posicion seleccionada
-                        String selectedAccion = spnAcciones.getSelectedItem().toString(); // Obtiene el nombre de la accion seleccionada
-
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         // Obtener la lista de acciones de la Accion seleccionada
-                        Acciones accionSeleccionada = configuracion.getAcciones().get(selectedPosition);
+                        Acciones accionSeleccionada = configuracion.getAcciones().get(i);
                         configuracion.setAccion(accionSeleccionada.getNombre());
 
                         // Aplicar los textos segun la Accion selecionada
@@ -178,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
                         dialogAccions.dismiss();
                     }
                 });
+
                 dialogAccions.show();
             }
         });
@@ -193,8 +156,6 @@ public class MainActivity extends AppCompatActivity {
         // Agregar los botones al LinearLayout dentro del HorizontalScrollView
         menuLayout.addView(btnConfiguracion);
         menuLayout.addView(btnAcciones);
-        menuLayout.addView(btnConectar);
-        menuLayout.addView(btnRenderizar);
         menuLayout.addView(btnHate);
 
         // Agregar el LinearLayout al HorizontalScrollView
@@ -272,11 +233,9 @@ public class MainActivity extends AppCompatActivity {
 
     void conectarServidor() {
         try {
-            if (socket != null && !socket.isClosed()) {
-                sendMessage("!D");
-                socket.close();
+            if (socket == null || socket.isClosed()) {
+                new ConnectTask().execute();
             }
-            new ConnectTask().execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -302,26 +261,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     private void aplicarTextoAcciones(Acciones acciones) {
-        // Asignar el texto de los botones segun la posicion de cada item en el array
-        for (int i = 0; i < acciones.getTextos_acciones().size(); i++) {
-            if (i < botonesAccion.size()) {
-                String texto = acciones.getTextos_acciones().get(i);
-                if (texto.isEmpty()) { // si no hay nada. deshabilitamos
-                    botonesAccion.get(i).setEnabled(false); botonesAccion.get(i).setVisibility(INVISIBLE);
-                    continue;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Asignar el texto de los botones segun la posicion de cada item en el array
+                for (int i = 0; i < acciones.getTextos_acciones().size(); i++) {
+                    if (i < botonesAccion.size()) {
+                        String texto = acciones.getTextos_acciones().get(i);
+                        if (texto.isEmpty()) { // si no hay nada. deshabilitamos
+                            botonesAccion.get(i).setEnabled(false); botonesAccion.get(i).setVisibility(INVISIBLE);
+                            continue;
+                        }
+                        // Actualizar el texto de los botones
+                        System.out.println("btn" + i + ": " + texto);
+                        botonesAccion.get(i).setText(texto);
+                        botonesAccion.get(i).setEnabled(true); botonesAccion.get(i).setVisibility(VISIBLE);
+                        botonesAccion.get(i).setAllCaps(false); botonesAccion.get(i).setTransformationMethod(null);
+                    }
                 }
-                // Actualizar el texto de los botones
-                System.out.println("btn" + i + ": " + texto);
-                botonesAccion.get(i).setText(texto);
-                botonesAccion.get(i).setEnabled(true); botonesAccion.get(i).setVisibility(VISIBLE);
-                botonesAccion.get(i).setAllCaps(false); botonesAccion.get(i).setTransformationMethod(null);
+                // Ocultar los botones restantes
+                for (int i = acciones.getTextos_acciones().size(); i < botonesAccion.size(); i++) {
+                    botonesAccion.get(i).setVisibility(INVISIBLE);
+                    botonesAccion.get(i).setEnabled(false);
+                }
             }
-        }
-        // Ocultar los botones restantes
-        for (int i = acciones.getTextos_acciones().size(); i < botonesAccion.size(); i++) {
-            botonesAccion.get(i).setVisibility(View.INVISIBLE);
-            botonesAccion.get(i).setEnabled(false);
-        }
+        });
     }
 
 

@@ -57,6 +57,7 @@ py SocketeDeck.py
 Aunque el proyecto para mí está terminado, ya que cumple la función por la que fue desarrollado, me gustaría agregarle algunas otras cosas.  
 
  - Iconos: Set de iconos preestablecidos (seguramente de Bootstrap o Font Awesome) que se puedan ver en la app móvil.*
+ - Cantidad de botones: Actualmente la aplicación móvil controla la cantidad de botones, me gustaria que el servidor le dijiera cuantos botones debe renderizar.
 
 > - ~~Padding de botones: Comandos vacíos para saltar botones en la app móvil.~~  
 > - ~~Información de acciones: Darle un nombre y descripción, junto con el autor y versión de una acción.~~  

@@ -41,7 +41,7 @@ def accion(id: int)-> str:
 
 about = {
     "nombre": "OBS Studio Controller",
-    "descripcion": "",
+    "descripcion": "Basic OBS Studio controller though sockets",
     "autor": "Urfenox",
     "version": "2.0"
 }

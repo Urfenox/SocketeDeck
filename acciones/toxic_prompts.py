@@ -43,7 +43,7 @@ def accion(id: int)-> str:
 
 about = {
     "nombre": "Overwatch Toxic Prompts",
-    "descripcion": "",
+    "descripcion": "Let's get salty!",
     "autor": "Urfenox",
     "version": "1.0"
 }

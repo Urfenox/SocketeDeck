@@ -7,6 +7,8 @@ SERVER = "0.0.0.0" # para red local
 PORT = 16100
 ADDR = (SERVER, PORT)
 
+clientes_config = {}
+
 class Cliente:
     HEADER = 1024
     FORMAT = "utf-8"
@@ -18,15 +20,25 @@ class Cliente:
         self.config = None
         self.connected = True
 
-        # Cargar configuracion inicial
         self.cargar_configuracion()
 
     def cargar_configuracion(self):
+        global clientes_config
+        if self.addr[0] in clientes_config:
+            self.config, self.accion = clientes_config[self.addr[0]]
+        else:
+            self.cargar_configuracion_inicial()
+
+    def cargar_configuracion_inicial(self):
         contenido = {}
         with open('config.json') as f:
             contenido = json.load(f)
         self.accion = configuracion.obtener_modulo(contenido["configuracion"]["acciones"])
         self.config = configuracion.obtener_configuracion(contenido["configuracion"]["acciones"])
+
+    def guardar_configuracion(self):
+        global clientes_config
+        clientes_config[self.addr[0]] = (self.config, self.accion)
 
     def atender_cliente(self):
         print(f"[{self.addr}] conectado!")
@@ -53,6 +65,7 @@ class Cliente:
         except Exception as ex:
             print(f"[ERROR] {self.addr} {ex}")
         finally:
+            self.guardar_configuracion()
             print(f"[{self.addr}] desconectado!")
             self.conn.close()
 
