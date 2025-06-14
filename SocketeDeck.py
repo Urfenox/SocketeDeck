@@ -74,6 +74,8 @@ def abrir_servidor():
     server.bind(ADDR)
     server.listen()
     print("Escuchando en {}:{}...".format(SERVER, PORT))
+    print(" Accion por defecto: {}".format(configuracion.obtener_default()))
+    print(" Acciones encontradas: {}".format(configuracion.obtener_acciones()))
     while True:
         conn, addr = server.accept()
         cli = Cliente(conn, addr)

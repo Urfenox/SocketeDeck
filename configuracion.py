@@ -1,10 +1,15 @@
 from pathlib import Path
-import importlib
+import importlib, json
 
 def obtener_acciones()-> list:
     ruta_carpeta = Path('acciones')
     acciones = [archivo.name.replace('.py', '') for archivo in ruta_carpeta.iterdir() if archivo.is_file() and archivo.suffix == '.py' and '__init__' not in archivo.name]
     return acciones
+
+def obtener_default()-> str:
+    with open('config.json') as f:
+        contenido = json.load(f)
+    return str(contenido['configuracion']['acciones'])
 
 def obtener_configuracion(accion_actual: str)-> dict:
     lista_acciones = obtener_acciones()
